@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, MessageSquare } from "lucide-react";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { useCustomCursor } from "./custom-cursor";
 
 interface ContactModalProps {
@@ -46,13 +48,24 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
     }
   }, [isOpen]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!message.trim()) return;
-    
+
+    try {
+      await addDoc(collection(db, "leads"), {
+        message: message.trim(),
+        source: "contact_modal",
+        status: "new",
+        createdAt: serverTimestamp(),
+      });
+    } catch (error) {
+      console.error("Error al registrar lead en Firestore", error);
+    }
+
     const phoneNumber = "5491137725766";
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
-    
+
     window.open(whatsappUrl, "_blank");
     onClose();
     setMessage("");
