@@ -16,7 +16,8 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
-export type LeadStatus = "new" | "in_progress" | "closed";
+// --- CRM (INTEL) ---
+export type LeadStatus = "new" | "contacted" | "negotiating" | "won" | "lost";
 
 export interface Lead {
   id: string;
@@ -30,22 +31,78 @@ export interface Lead {
   source?: string;
 }
 
-export type TargetStatus = "pending" | "contacted" | "follow_up" | "closed";
+// --- OPS (OPERATIONS) ---
+export type ProjectStatus = 
+  | "lead" 
+  | "negotiation" 
+  | "development" 
+  | "qa" 
+  | "deployment" 
+  | "maintenance" 
+  | "completed" 
+  | "archived";
 
-export interface Target {
+export interface Project {
   id: string;
-  company: string;
-  contact?: string;
-  status: TargetStatus;
+  name: string; // Internal codename or project name
+  clientName: string;
+  status: ProjectStatus;
+  startDate?: Date;
+  deadline?: Date;
+  techStack?: string[]; // e.g. ["Next.js", "Firebase"]
+  repositoryUrl?: string;
+  totalValue?: number;
+  currency?: string; // "USD", "ARS"
   notes?: string;
   createdAt?: Date;
 }
 
+// --- TREASURY (FINANCE) ---
+export type TransactionType = "income" | "expense";
+export type TransactionCategory = 
+  | "project_payment" 
+  | "hosting" 
+  | "software_license" 
+  | "contractor" 
+  | "marketing" 
+  | "other";
+
+export interface Transaction {
+  id: string;
+  description: string;
+  amount: number;
+  type: TransactionType;
+  category: TransactionCategory;
+  date: Date;
+  relatedProjectId?: string; // Link to a project if applicable
+  createdAt?: Date;
+}
+
+// --- SETTINGS (SYSTEM) ---
+export interface SystemSettings {
+  id: string; // usually "global_settings"
+  monthlyRevenueGoal: number;
+  currency: string;
+  lastUpdated?: Date;
+}
+
+// --- LEGACY / ARCHIVES ---
 export interface Audit {
   id: string;
   company: string;
   filePath: string;
   url: string;
+  notes?: string;
+  createdAt?: Date;
+}
+
+// Deprecated: Migrating to Project
+export type TargetStatus = "pending" | "contacted" | "follow_up" | "closed";
+export interface Target {
+  id: string;
+  company: string;
+  contact?: string;
+  status: TargetStatus;
   notes?: string;
   createdAt?: Date;
 }
